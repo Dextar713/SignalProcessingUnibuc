@@ -1,0 +1,13 @@
+Ex 4
+B = 200 - 40 = 160Hz
+fs > 2*B = 2*160 = 320Hz
+
+Ex 7
+SNR(db) = 80
+PS(db) = 90
+SNR = PS/PN
+SNR(db) = 10*log10(PS/PN) = 10*log10(PS) - 10*log10(PN)
+SNR(db) = PS(db) - PN(db)
+PN(db) = PNoise(db) = PS(db) - SNR(db) = 90 - 80 = 10db
+10*log10(PS/PN)=SNR
+

@@ -122,7 +122,7 @@ def bytes_to_bits(byte_array: bytes, padding: int = 0) -> str:
     return bitstring
 
 
-def pipeline_save(data: list[int], output_path='huffman.bin') -> None:
+def pipeline_save(data: list[int], H:int, W:int, output_path='huffman.bin') -> None:
     freq_map = Counter(data)
 
     encoder = HuffmanEncoder()
@@ -130,15 +130,16 @@ def pipeline_save(data: list[int], output_path='huffman.bin') -> None:
     encoder.dfs_encode()
 
     encoded_bytes, padding = encoder.encode_data(data)
-
     with open(output_path, 'wb') as f:
         f.write(b'HUFF')
+        f.write(struct.pack('>H', H))
+        f.write(struct.pack('>H', W))
         f.write(struct.pack('>H', len(encoder.codes)))  # Num symbols
         for symbol, code in encoder.codes.items():
-            f.write(struct.pack('>h', symbol))  # Symbol (2 bytes signed)
+            f.write(struct.pack('>h', symbol))  # Symbol (4 bytes signed)
             f.write(struct.pack('>B', len(code)))  # Code Len (1 byte)
 
-            # Write variable length code bits packed into bytes
+            # Variable length code bits packed into bytes
             code_bytes, code_pad = bits_to_bytes(code)
             f.write(code_bytes)
 
@@ -146,11 +147,12 @@ def pipeline_save(data: list[int], output_path='huffman.bin') -> None:
         f.write(encoded_bytes)
 
 
-def pipeline_read(input_path='huffman.bin') -> list[int]:
+def pipeline_read(input_path='huffman.bin') -> tuple[list[int], int, int]:
     with open(input_path, 'rb') as f:
         if f.read(4) != b'HUFF':
             raise ValueError("Invalid Header")
-
+        H = struct.unpack('>H', f.read(2))[0]
+        W = struct.unpack('>H', f.read(2))[0]
         (num_symbols,) = struct.unpack('>H', f.read(2))
         code_map = {}
 
@@ -171,4 +173,4 @@ def pipeline_read(input_path='huffman.bin') -> list[int]:
 
     encoder = HuffmanEncoder()
     encoder.build_from_config(code_map)
-    return encoder.decode_stream(bitstring)
+    return encoder.decode_stream(bitstring), H, W

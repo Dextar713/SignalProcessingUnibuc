@@ -1,8 +1,8 @@
 import os
 import numpy as np
 from scipy.fft import dctn
-from shared_const import Q_jpeg, zigzag
 from jpeg_encoder.huffman_encoder import pipeline_save
+import shared_const as sh
 
 IMG_NAME = ''
 COMPRESSED_DIR_NAME = ''
@@ -29,7 +29,7 @@ def flatten_zigzag(block):
     flat = np.zeros(shape=N*N, dtype=int)
     for i in range(N):
         for j in range(N):
-            flat[zigzag[i, j]] = block[i, j]
+            flat[sh.zigzag[i, j]] = block[i, j]
     return flat
 
 def run_length_encode(y_flat):
@@ -53,7 +53,7 @@ def encode_huffman(y: list[int], channel_id, H, W):
 
 def encode_block(block):
     y = dctn(block)
-    y_jpeg = (np.round(y / Q_jpeg).astype(int))
+    y_jpeg = (np.round(y / (sh.Q_scale * sh.Q_jpeg)).astype(int))
     y_zigzag = flatten_zigzag(y_jpeg)
     # y_rle = run_length_encode(y_zigzag)
     return y_zigzag

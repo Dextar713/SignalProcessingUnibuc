@@ -1,9 +1,7 @@
 import os
 import numpy as np
 from scipy.fft import idctn
-
-from jpeg_encoder.shared_const import Q_jpeg
-from shared_const import zigzag
+import shared_const as sh
 from jpeg_encoder.huffman_encoder import pipeline_read
 
 def ycrcb_to_rgb(img: np.ndarray) -> np.ndarray:
@@ -27,13 +25,13 @@ def zigzag_to_matrix(flat: np.ndarray) -> np.ndarray:
     M = np.zeros(shape=(N, N), dtype=int)
     for i in range(N):
         for j in range(N):
-            M[i, j] = flat[zigzag[i, j]]
+            M[i, j] = flat[sh.zigzag[i, j]]
     return M
 
 
 def decode_block(y_zigzag: np.ndarray) -> np.ndarray:
     y_jpeg = zigzag_to_matrix(y_zigzag)
-    y = y_jpeg * Q_jpeg
+    y = y_jpeg * sh.Q_jpeg * sh.Q_scale
     x_jpeg = idctn(y)
     return x_jpeg
 
